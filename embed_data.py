@@ -35,11 +35,6 @@ def main(targt):
         # summary = vals['summary_sql']
         topic = vals['topic_sql'][:]
         username = vals['username_sql'][:]
-        print(f'run: {run}')
-        print(f'text: {text}')
-        # print(f'summary: {summary}')
-        print(f'topic: {topic}')
-        print(f'username: {username}')
         text_data[k] = {
                 'run': run,
                 'text': text,
@@ -56,8 +51,6 @@ def main(targt):
     values = list(processed_text_data.values())
     collection.add(ids = keys,
                    documents = values)
-    breakpoint()
-    # embeddings = embed_sentences(processed_text_data.values())
     # print(f'embeddings: {embeddings}')
 
 
