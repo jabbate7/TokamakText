@@ -1,5 +1,7 @@
 from pdf2docx import Converter
 
+#pip install pdf2docx
+
 def convert_pdf_to_word(pdf_path, docx_path):
     # Create a Converter instance
     cv = Converter(pdf_path)
