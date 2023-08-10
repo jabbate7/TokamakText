@@ -2,3 +2,8 @@ Run the mass_pdf_to_txt.py for convert PDF to TXT
 Change 'directory_to_search' for the location that has all the PDFs 
 
 And put all the txt files in the 'target_dir'
+
+
+Run discharge_number_exactor.py
+
+So that one can put in directory of txt files, and output a csv files with file names and discharge numbers in those files. 
