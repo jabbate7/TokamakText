@@ -1,0 +1,4 @@
+Retrieved shot notes:
+{results}
+
+Question: {question}
