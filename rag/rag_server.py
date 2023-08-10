@@ -18,12 +18,14 @@ def index():
     question = ""
     retrieved_results = ""
     generated_answer = ""
+    display_results = False
 
     if request.method == "POST":
         question = request.form.get("question")
         results = retrieve(question)
         retrieved_results = "\n".join([f"{key}: {value}" for key, value in results.items()])
         generated_answer = rag_answer_question(question, results)
+        display_results = True
 
     split_response = generated_answer.split("ANSWER:")
     thinking = split_response[0].strip()
@@ -38,13 +40,17 @@ def index():
         <textarea id="question" name="question" cols="40" rows="5" required></textarea>
         <input type="submit" value="Submit">
     </form>
-    <h3>Retrieved Results:</h3>
-    <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
-    <h3>Thinking:</h3>
-    <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
-    <h3>Generated Answer:</h3>
-    <pre style="white-space: pre-wrap;">{{ answer }}</pre>
-    """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer)
+    {% if display_results %}
+        <h3>Retrieved Results:</h3>
+        <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
+        <h3>Question:</h3>
+        <pre style="white-space: pre-wrap;">{{ question }}</pre>
+        <h3>Thinking:</h3>
+        <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
+        <h3>Generated Answer:</h3>
+        <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+    {% endif %}
+    """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
 
 if __name__ == "__main__":
     app.run(debug=True)
