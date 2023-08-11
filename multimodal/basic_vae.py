@@ -1,4 +1,6 @@
 import os
+import copy
+
 import numpy as np
 import tqdm
 import h5py
@@ -68,6 +70,7 @@ def vae_loss(decoded, x, mu, logvar):
 def train_vae(vae, input_dim, epochs, lr, train_loader, val_loader, test_loader):
     # Define the VAE model and optimizer
     optimizer = optim.Adam(vae.parameters(), lr=lr)
+    best_val_loss = float('inf')
 
     # Training loop
     vae.train()
@@ -102,6 +105,22 @@ def train_vae(vae, input_dim, epochs, lr, train_loader, val_loader, test_loader)
         print(f'Epoch [{epoch+1}/{epochs}], VAL Loss: {val_loss / num_val:.6f}')
         ####
 
+        ###
+        if val_loss < best_val_loss:
+            best_val_epoch = epoch
+            best_val_loss = val_loss
+            best_model = copy.deepcopy(vae.state_dict())
+
+        print(best_val_epoch)
+        early_stop = (500 < best_val_epoch) and best_val_epoch < (epoch + 50) and val_loss >= best_val_loss
+        if early_stop:
+            print("Early stopping)")
+            break
+        ###
+
+        vae.load_state_dict(best_model)
+
+    torch.save(vae.state_dict(), 'best_vae_model.pt')
 
     print("Training finished!")
 
@@ -176,39 +195,78 @@ def prepare_data(x_arr):
 
 
 if __name__ == "__main__":
-    # Hyperparameters
+    # #####
+    # # Hyperparameters
+    # batch_size = 64
+    # latent_dim = 5
+    # lr = 0.0005
+    # epochs = 5000
+    # input_dim = 11
+
+    # if os.path.exists('shotnums.npy'):
+    #     shotnums = np.load('shotnums.npy')
+    #     values = np.load('shot_data.npy')
+
+    #     values_train = np.load("values_train.npy")
+    #     values_val = np.load("values_val.npy")
+    #     values_test = np.load("values_test.npy")
+    #     shotnums_train = np.load("shotnums_train.npy")
+    #     shotnums_val = np.load("shotnums_val.npy")
+    #     shotnums_test = np.load("shotnums_test.npy")
+    # else:
+    #     prep_data()
+
+    #     # Split into train and test
+    #     values_train, values_test, shotnums_train, shotnums_test = train_test_split(
+    #         values, shotnums, test_size=0.15, random_state=42)
+
+    #     # Split train into train and validation
+    #     values_train, values_val, shotnums_train, shotnums_val = train_test_split(
+    #         values_train, shotnums_train, test_size=0.2, random_state=42)
+
+
+    # train_loader = prepare_data(values_train)
+    # val_loader = prepare_data(values_val)
+    # test_loader = prepare_data(values_test)
+
+    # vae = VAE(input_dim=input_dim, latent_dim=latent_dim)
+    # breakpoint()
+    # train_out = train_vae(vae, input_dim, epochs, lr, train_loader, val_loader, test_loader)
+    # #####
+
     batch_size = 64
-    latent_dim = 20
+    latent_dim = 5
     lr = 0.0005
-    epochs = 1000
+    epochs = 5000
     input_dim = 11
+    vae = VAE(input_dim=input_dim, latent_dim=latent_dim)
+    vae.load_state_dict(torch.load("best_vae_model.pt"))
+    vae.eval()
 
-    if os.path.exists('shotnums.npy'):
-        shotnums = np.load('shotnums.npy')
-        values = np.load('shot_data.npy')
+    shotnums = np.load('shotnums.npy')
+    values = np.load('shot_data.npy')
+    values_train = np.load("values_train.npy")
+    tr_mu = np.mean(values_train, axis=0)
+    tr_std = np.std(values_train, axis=0)
+    np.save('normalizer_mu.npy', tr_mu)
+    np.save('normalizer_std.npy', tr_std)
+    values = (values - tr_mu) / tr_std
+    values_tensor = torch.from_numpy(values).float()
+    # values_val = np.load("values_val.npy")
+    # values_test = np.load("values_test.npy")
+    # shotnums_train = np.load("shotnums_train.npy")
+    # shotnums_val = np.load("shotnums_val.npy")
+    # shotnums_test = np.load("shotnums_test.npy")
 
-        values_train = np.load("values_train.npy")
-        values_val = np.load("values_val.npy")
-        values_test = np.load("values_test.npy")
-        shotnums_train = np.load("shotnums_train.npy")
-        shotnums_val = np.load("shotnums_val.npy")
-        shotnums_test = np.load("shotnums_test.npy")
-    else:
-        prep_data()
+    with torch.no_grad():
+        encodings = vae.encoder(values_tensor).numpy()
+    encoding_dict = {}
+    breakpoint()
+    for i in range(encodings.shape[0]):
 
-        # Split into train and test
-        values_train, values_test, shotnums_train, shotnums_test = train_test_split(
-            values, shotnums, test_size=0.15, random_state=42)
+        encoding_dict[str(shotnums[i])] = encodings[i]
 
-        # Split train into train and validation
-        values_train, values_val, shotnums_train, shotnums_val = train_test_split(
-            values_train, shotnums_train, test_size=0.2, random_state=42)
+    # pkl.dump(encodings, open('vae_encodings.pkl', 'wb'))
+    pkl.dump(encoding_dict, open('vae_encodings.pkl', 'wb'))
 
-
-    train_loader = prepare_data(values_train)
-    val_loader = prepare_data(values_val)
-    test_loader = prepare_data(values_test)
-
-    vae = VAE(input_dim=input_dim, latent_dim=512)
-    train_out = train_vae(vae, input_dim, epochs, lr, train_loader, val_loader, test_loader)
 
