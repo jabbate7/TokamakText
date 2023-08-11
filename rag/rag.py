@@ -36,6 +36,7 @@ class Model:
             device_map="auto",
             torch_dtype=torch.float16,
             load_in_8bit=True,
+            rope_scaling={"type": "dynamic", "factor": 2} # allows handling of longer inputs
             cache_dir=cache_dir,
         )
         self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
@@ -90,7 +91,7 @@ def process_results(results):
 def rag_answer_question(question, results):
     processed_results = process_results(results)
     formatted_user_prompt = USER_PROMPT.format(question=question, results=processed_results)
-    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-3.5-turbo')
+    return get_chat_completion_huggingface(SYSTEM_PROMPT, formatted_user_prompt)
 
 
 def test():

@@ -1,4 +1,4 @@
-import openai
+# import openai
 import os
 from dotenv import load_dotenv
 import numpy as np
@@ -14,13 +14,13 @@ if __name__ == '__main__':
     load_dotenv(dotenv_path)
 
 
-openai.api_type = "azure"
-openai.api_key = os.getenv("OPENAI_API_KEY")
-if openai.api_key is None:
-    logging.warning("openai.api_key is None")
+# openai.api_type = "azure"
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+# if openai.api_key is None:
+#     logging.warning("openai.api_key is None")
 
-openai.api_base = "https://test-oai69420.openai.azure.com/"
-openai.api_version = "2023-05-15"
+# openai.api_base = "https://test-oai69420.openai.azure.com/"
+# openai.api_version = "2023-05-15"
 start = None
 num_requests = 0
 
@@ -49,23 +49,24 @@ class TokenBucket:
 
 MaybeTokenBucket = Optional[TokenBucket]
 
-async def _embed_sentence(sentence: str, token_bucket: MaybeTokenBucket=None) -> List[float]:
-    done = False
-    while not done:
-        try:
-            if token_bucket is not None:
-                await token_bucket.consume()
-            response = await openai.Embedding.acreate(
-                input=sentence,
-                engine="embeddings"
-            )
-            embedding = response['data'][0]['embedding']
-            done = True
-        except Exception as e:
-            if token_bucket is None:
-                sleep(1)
-            print(e)
-    return embedding
+# async def _embed_sentence(sentence: str, token_bucket: MaybeTokenBucket=None) -> List[float]:
+#     done = False
+#     while not done:
+#         try:
+#             if token_bucket is not None:
+#                 await token_bucket.consume()
+#             response = await openai.Embedding.acreate(
+#                 input=sentence,
+#                 engine="embeddings"
+#             )
+#             import pdb; pdb.set_trace()
+#             embedding = response['data'][0]['embedding']
+#             done = True
+#         except Exception as e:
+#             if token_bucket is None:
+#                 sleep(1)
+#             print(e)
+#     return embedding
 
 
 def embed_sentence(sentence: str) -> List[float]:
@@ -113,33 +114,33 @@ def embed_sentences(sentences: List[str]) -> List[List[float]]:
         return await asyncio.gather(*tasks)
     return asyncio.run(gather_tasks())
 
-async def _call_chat(system_prompt: str, user_prompt:str) -> str:
-    messages= [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-    # TODO: get configs
-    response = await openai.ChatCompletion.acreate(
-            engine="gpt-35-turbo-16k",
-            messages=messages,
-            )
-    completion = response.choices[0].message
-    return completion
+# async def _call_chat(system_prompt: str, user_prompt:str) -> str:
+#     messages= [
+#             {"role": "system", "content": system_prompt},
+#             {"role": "user", "content": user_prompt},
+#         ]
+#     # TODO: get configs
+#     response = await openai.ChatCompletion.acreate(
+#             engine="gpt-35-turbo-16k",
+#             messages=messages,
+#             )
+#     completion = response.choices[0].message
+#     return completion
 
-def call_chat(system_prompt: str, user_prompt:str) -> str:
-    messages= [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-    # print(messages)
-    # TODO: get configs
-    response = openai.ChatCompletion.create(
-            engine="gpt-35-turbo-16k",
-            messages=messages,
-            temperature=0,
-            )
-    completion = response.choices[0].message.content
-    return completion
+# def call_chat(system_prompt: str, user_prompt:str) -> str:
+#     messages= [
+#             {"role": "system", "content": system_prompt},
+#             {"role": "user", "content": user_prompt},
+#         ]
+#     # print(messages)
+#     # TODO: get configs
+#     response = openai.ChatCompletion.create(
+#             engine="gpt-35-turbo-16k",
+#             messages=messages,
+#             temperature=0,
+#             )
+#     completion = response.choices[0].message.content
+#     return completion
 
 def cosine_similarity(query_embedding, document_embeddings):
     # assumes everything is normalized
