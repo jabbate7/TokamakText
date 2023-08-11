@@ -5,17 +5,26 @@ import yaml
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
 
+FILE_PATH = os.path.dirname(os.path.realpath(__file__))
+
 class LLMInterface:
     def __init__(self) -> None:
         pass
 
-    def query(self, system_message, user_message):
+    def query(self, system: str, user_message: str):
         raise NotImplementedError()
 
 class HuggingFaceInterface(LLMInterface):
-    def __init__(self,
-                 model_name = "upstage/llama-30b-instruct-2048",
-                 cache_dir="/nobackup1/allenw/Scratch/") -> None:
+    def __init__(self) -> None:
+        yaml_file_path = os.path.join(FILE_PATH, "configs", "huggingface.yaml")
+        self.config = yaml.load(open(yaml_file_path, "r"), Loader=yaml.FullLoader)
+        model_name, cache_dir = self.config["model_name"], self.config["cache_dir"]
+
+        # Check if cache_Dir is a real directory
+        if not os.path.isdir(cache_dir):
+            raise Exception(f"cache_dir {cache_dir} specified in {yaml_file_path} is not a directory")
+        
+        self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
@@ -27,14 +36,17 @@ class HuggingFaceInterface(LLMInterface):
         )
         self.streamer = TextStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
 
-    def query(self, system_message, user_message):
-        inputs = self.format_input(system_message, user_message)
+    def query(self, instruction, user_message):
+        inputs = self.format_input(instruction, user_message)
         output = self.model.generate(**inputs, streamer=self.streamer, use_cache=True, max_new_tokens=float('inf'))
         output_text = self.tokenizer.decode(output[0], skip_special_tokens=True)
-        return output_text
+        # The output text includes the input text, so we need to remove it.
+        response = output_text.split("Response")[1]
+        return response
 
-    def format_input(self, system, user_input):
-        input_string = f"### System:\n{system}\n### User:\n{user_input}\n### Assistant:\n"
+    def format_input(self, instruction, user_input):
+        # Note: one issue seems to be the llama prompt format is juat a bit different...
+        input_string = f"### Instruction:\n{instruction}\n### Input:\n{user_input}\n### Response:\n"
         inputs = self.tokenizer(input_string, return_tensors="pt").to(self.model.device)
         del inputs["token_type_ids"]
         return inputs
@@ -42,20 +54,16 @@ class HuggingFaceInterface(LLMInterface):
 class OpenAIInterface(LLMInterface):
     def __init__(self, model_name="gpt-3.5-turbo") -> None:
         super().__init__()
-        openai.api_type = "azure"
         openai.api_key = os.getenv("OPENAI_API_KEY")
         if openai.api_key is None:
             logging.warning("openai.api_key is None")
-
-        openai.api_base = "https://test-oai69420.openai.azure.com/"
-        openai.api_version = "2023-05-15"
         self.model_name = model_name
 
-    def query(self, system_message, user_message):
+    def query(self, system, user_message):
         completion = openai.ChatCompletion.create(
             model=self.model_name,
             messages=[
-                {"role": "system", "content": system_message},
+                {"role": "system", "content": system},
                 {"role": "user", "content": user_message}
             ]
         )

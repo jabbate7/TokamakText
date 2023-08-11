@@ -1,6 +1,6 @@
 import os
 import chromadb
-from llm_interface import LLMInterface, OpenAIInterface
+from llm_interface import LLMInterface, OpenAIInterface, HuggingFaceInterface
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
@@ -41,12 +41,16 @@ def rag_answer_question(question, results, model: LLMInterface):
     return model.query(SYSTEM_PROMPT, formatted_user_prompt)
 
 def test():
-    question = "What should I do if we are getting tearing modes early in the shot?"
+    question = "Tell me about shots that struggled with tearing modes"
     model = OpenAIInterface(model_name="gpt-3.5-turbo")
     results = retrieve(question, model)
     answer = rag_answer_question(question, results, model)
-    print(answer)
+    print(f"Model {model.model_name} answer:\n{answer}")
 
+    model2 = HuggingFaceInterface()
+    results2 = retrieve(question, model2)
+    answer2 = rag_answer_question(question, results2, model2)
+    print(f"Model {model2.model_name} answer:\n{answer2}")
 
 
 if __name__ == '__main__':
