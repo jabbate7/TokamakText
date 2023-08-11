@@ -1,0 +1,2 @@
+model_name: "NousResearch/Nous-Hermes-Llama2-13b"
+cache_dir: "/nobackup1/allenw/Scratch/" # Directory where the LLM will be cached.

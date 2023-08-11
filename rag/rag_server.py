@@ -13,7 +13,7 @@ def get_llm_interface(model_name):
 
 
 @click.command()
-@click.option('--model', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
+@click.option('--model_name', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
 def main(model_name):
     """
     Load the language model to use.
@@ -46,15 +46,18 @@ def main(model_name):
         else:
             answer = split_response[1].strip()
 
-        return render_template_string("""
+        return render_template_string(
+        """
         <form method="post">
-            <label for="question">Ask a Question:</label>
+            <label for="question">Ask {{ model_name }} a Question:</label>
             <textarea id="question" name="question" cols="40" rows="5" required></textarea>
             <input type="submit" value="Submit">
         </form>
         {% if display_results %}
             <h3>Retrieved Results:</h3>
             <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
+            <h3>Model Name:</h3>
+            <pre style="white-space: pre-wrap;">{{ model_name }}</pre>
             <h3>Question:</h3>
             <pre style="white-space: pre-wrap;">{{ question }}</pre>
             <h3>Thinking:</h3>
@@ -62,7 +65,11 @@ def main(model_name):
             <h3>Generated Answer:</h3>
             <pre style="white-space: pre-wrap;">{{ answer }}</pre>
         {% endif %}
-        """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
+        """, question=question, 
+            retrieved_results=retrieved_results, 
+            thinking=thinking, answer=answer, 
+            display_results=display_results, 
+            model_name=llm_interface.model_name)
     
     app.run(debug=True)
 if __name__ == "__main__":
