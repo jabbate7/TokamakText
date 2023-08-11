@@ -3,3 +3,4 @@ data/
 venvtt/
 *__pycache__*
 rag/db
+.vscode/
