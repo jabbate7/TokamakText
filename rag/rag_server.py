@@ -1,7 +1,8 @@
 from flask import Flask, render_template_string, request
-from rag import retrieve, rag_answer_question
+from rag import rag_query
 from llm_interface import OpenAIInterface, HuggingFaceInterface
 import click
+from typing import List
 
 def get_llm_interface(model_name):
     if model_name == "openai":
@@ -11,10 +12,18 @@ def get_llm_interface(model_name):
     else:
         raise ValueError(f"Invalid model name: {model_name}")
 
+def format_passes(list_of_passes: List[str]):
+    n_passes = len(list_of_passes)
+    out = ""
+    for i, pass_res in enumerate(list_of_passes):
+        out += f"Pass {i+1}/{n_passes}:\n{pass_res}\n"
+    return out
 
 @click.command()
 @click.option('--model_name', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
-def main(model_name):
+@click.option('--n_pass', type=int, default=1, help='Number of passes to run.')
+@click.option('--n_logs_per_pass', type=int, default=5, help="Number of logs to process per pass.")
+def main(model_name, n_pass, n_logs_per_pass):
     """
     Load the language model to use.
     """
@@ -28,24 +37,26 @@ def main(model_name):
     @app.route("/", methods=["GET", "POST"])
     def index():
         question = ""
-        retrieved_results = ""
-        generated_answer = ""
+        display_answers = ""
+        display_thinking = ""
+        thinks = []
+        answers = []
+        logs_to_display = ""
         display_results = False
 
+        question = request.form.get("question")
         if request.method == "POST":
-            question = request.form.get("question")
-            results = retrieve(question, llm_interface)
-            retrieved_results = "\n".join([f"{key}: {value}" for key, value in results.items()])
-            generated_answer = rag_answer_question(question, results, llm_interface)
+            logs, thinks, answers = rag_query(question, llm_interface, n_logs_per_pass, n_pass)
+            if n_pass > 1:
+                logs = format_passes(logs)
+                thinks = format_passes(thinks)
+                answers = format_passes(answers)
             display_results = True
 
-        split_response = generated_answer.split("ANSWER:")
-        thinking = split_response[0].strip()
-        if len(split_response) == 1:
-            answer = ""
-        else:
-            answer = split_response[1].strip()
-
+            logs_to_display = logs
+            display_thinking = thinks
+            display_answers = answers
+    
         return render_template_string(
         """
         <form method="post">
@@ -55,19 +66,20 @@ def main(model_name):
         </form>
         {% if display_results %}
             <h3>Retrieved Results:</h3>
-            <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
+            <pre style="white-space: pre-wrap;">{{ logs_to_display }}</pre>
             <h3>Model Name:</h3>
             <pre style="white-space: pre-wrap;">{{ model_name }}</pre>
             <h3>Question:</h3>
             <pre style="white-space: pre-wrap;">{{ question }}</pre>
-            <h3>Thinking:</h3>
-            <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
-            <h3>Generated Answer:</h3>
-            <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+            <h3>display_thinking:</h3>
+            <pre style="white-space: pre-wrap;">{{ display_thinking }}</pre>
+            <h3>Generated display_answers:</h3>
+            <pre style="white-space: pre-wrap;">{{ display_answers }}</pre>
         {% endif %}
         """, question=question, 
-            retrieved_results=retrieved_results, 
-            thinking=thinking, answer=answer, 
+            display_thinking=display_thinking,
+            display_answers=display_answers, 
+            logs_to_display=logs_to_display, 
             display_results=display_results, 
             model_name=llm_interface.model_name)
     
