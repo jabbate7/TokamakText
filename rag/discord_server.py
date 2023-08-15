@@ -1,0 +1,40 @@
+# bot.py
+import os
+
+import discord
+from dotenv import load_dotenv
+from rag import retrieve, rag_answer_question
+
+
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+intents = discord.Intents.default()
+intents.messages = True
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'{client.user} has connected to Discord!')
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    question = message.content
+    results = retrieve(question)
+    retrieved_results = "\n".join([f"{key}: {value}" for key, value in results.items()])
+    generated_answer = rag_answer_question(question, results)
+    display_results = True
+
+    split_response = generated_answer.split("ANSWER:")
+    thinking = split_response[0].strip()
+    if len(split_response) == 1:
+        answer = ""
+    else:
+        answer = split_response[1].strip()
+
+    output = f"**Answer:** {answer}"
+    await message.channel.send(output)
+
+client.run(TOKEN)
