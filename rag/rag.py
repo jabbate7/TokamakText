@@ -1,9 +1,9 @@
 import os
 import chromadb
 import openai
-if __name__ == '__main__':
-    from dotenv import load_dotenv
-    load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 with open('prompts/system_prompt.txt', 'r') as f:
@@ -30,8 +30,8 @@ def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo"):
 
 def retrieve(question):
     print(f'initial question: {question}')
-    query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
-    print(f'query text: {query_text}')
+    # query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
+    # print(f'query text: {query_text}')
     collection = client.get_collection(collection_name)
     qr = collection.query(query_texts=question, n_results=5)
     ids = qr['ids'][0]
@@ -49,7 +49,7 @@ def process_results(results):
 def rag_answer_question(question, results):
     processed_results = process_results(results)
     formatted_user_prompt = USER_PROMPT.format(question=question, results=processed_results)
-    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-4')
+    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-3.5-turbo')
 
 
 def test():

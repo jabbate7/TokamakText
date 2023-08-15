@@ -10,6 +10,8 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.default()
 intents.messages = True
+intents.message_content = True
+intents.guilds = True
 client = discord.Client(intents=intents)
 
 @client.event
@@ -20,6 +22,8 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.author == client.user:
+        return
+    if client.user not in message.mentions:
         return
     question = message.content
     results = retrieve(question)
@@ -34,7 +38,7 @@ async def on_message(message):
     else:
         answer = split_response[1].strip()
 
-    output = f"**Answer:** {answer}"
+    output = f"{thinking}\n\n{answer}"
     await message.channel.send(output)
 
 client.run(TOKEN)
