@@ -1,5 +1,5 @@
 # TokamakText
-
+![](assets/chatd3d.png)
 ### Pip Environment
 1. Make pip environemnt
 2. `python3 -m pip install chromadb python-dotenv openai flask h5py`
