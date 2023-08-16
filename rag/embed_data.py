@@ -4,7 +4,6 @@ import sys
 import h5py
 # from embedding.llm_utils import embed_sentences
 import chromadb
-from tqdm import tqdm
 
 
 def read_file(file_name):
@@ -27,7 +26,7 @@ def process_text_data(text_data):
 def main(targt):
     data = read_file(targt)
     text_data = {}
-    for k in tqdm(data):
+    for k in data:
         if k in ('spatial_coordinates', 'times'):
             continue
         vals = data[k]
