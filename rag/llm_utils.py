@@ -79,7 +79,6 @@ async def _handle_sentence(sentence: str, token_bucket: TokenBucket, semaphore: 
     if num_requests % 1000 == 0:
         duration = time() - start
         duration_min = duration / 60
-        print(f"{num_requests=}, {duration=:.2f} rate per min={num_requests / duration_min:.2f}")
     return embedding
 
 
@@ -156,9 +155,9 @@ def argknn(query_embedding, document_embeddings, k=10):
 def test_embeddings():
     sentence = "George Biden was the 46th President of the United States"
     embedding = embed_sentence(sentence)
-    print(f"Embeddings are truncated to 5 elts")
-    print(f"{sentence=}")
-    print(f"{embedding[:5]=}")
+    # print(f"Embeddings are truncated to 5 elts")
+    # print(f"{sentence=}")
+    # print(f"{embedding[:5]=}")
     sentences = [sentence,
                 "Old MacDonald had a farm EIEIEO",
                 "The quick brown fox jumped over the lazy dog"]
@@ -177,12 +176,12 @@ def test_cosine_similarity():
     query_embedding = embed_sentence(query)
     document_embeddings = embed_sentences(documents)
     cosine_sims = cosine_similarity(query_embedding, document_embeddings)
-    print(f"{documents=}")
-    print(f"{cosine_sims=}")
+    # print(f"{documents=}")
+    # print(f"{cosine_sims=}")
     k = 2
     top_k_idxes = argknn(query_embedding, document_embeddings, k=k)
     top_k_docs = [documents[i] for i in top_k_idxes]
-    print(f"{query=}")
+    # print(f"{query=}")
     print(f"Top {k} documents: {top_k_docs}")
 
 
