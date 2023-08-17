@@ -38,31 +38,39 @@ def main(llm_type):
         else:
             answer = split_response[1].strip()
 
-        return render_template_string(
-        """
-        <form method="post">
-            <label for="question">Ask {{ llm_type }} a Question:</label>
-            <textarea id="question" name="question" cols="40" rows="5" required></textarea>
-            <input type="submit" value="Submit">
-        </form>
-        {% if display_results %}
-            <h3>Model Name:</h3>
-            <pre style="white-space: pre-wrap;">{{ model_name }}</pre>
-            <h3>Question:</h3>
-            <pre style="white-space: pre-wrap;">{{ question }}</pre>
-            <h3>Thinking:</h3>
-            <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
-            <h3>Generated Answer:</h3>
-            <pre style="white-space: pre-wrap;">{{ answer }}</pre>
-            <h3>Retrieved Results:</h3>
-            <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
-        {% endif %}
-        """, question=question, 
-            retrieved_results=retrieved_results, 
-            thinking=thinking, answer=answer, 
-            display_results=display_results, 
-            model_name=llm_interface.model_name)
-    
+    if request.method == "POST":
+        question = request.form.get("question")
+        results = retrieve(question)
+        retrieved_results = "\n".join([f"{key}: {value}" for key, value in results.items()])
+        generated_answer = rag_answer_question(question, results)
+        display_results = True
+
+    split_response = generated_answer.split("ANSWER:")
+    thinking = split_response[0].strip()
+    if len(split_response) == 1:
+        answer = ""
+    else:
+        answer = split_response[1].strip()
+
+    return render_template_string("""
+    <form method="post">
+        <label for="question">Ask a Question:</label>
+        <textarea id="question" name="question" cols="40" rows="5" required></textarea>
+        <input type="submit" value="Submit">
+    </form>
+    {% if display_results %}
+        <h3>Question:</h3>
+        <pre style="white-space: pre-wrap;">{{ question }}</pre>
+        <h3>Thinking:</h3>
+        <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
+        <h3>Generated Answer:</h3>
+        <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+        <h3>Retrieved Shot Logs:</h3>
+        <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
+    {% endif %}
+    """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
+
+if __name__ == "__main__":
     app.run(debug=True)
 if __name__ == "__main__":
     load_dotenv()
