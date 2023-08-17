@@ -41,14 +41,14 @@ def index():
         <input type="submit" value="Submit">
     </form>
     {% if display_results %}
-        <h3>Retrieved Results:</h3>
-        <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
         <h3>Question:</h3>
         <pre style="white-space: pre-wrap;">{{ question }}</pre>
         <h3>Thinking:</h3>
         <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
         <h3>Generated Answer:</h3>
         <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+        <h3>Retrieved Shot Logs:</h3>
+        <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
     {% endif %}
     """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
 
