@@ -1,5 +1,7 @@
 import re
 import tiktoken
+import os
+from dotenv import load_dotenv
 load_dotenv()
 
 model = os.getenv("LLM_NAME")
@@ -10,7 +12,7 @@ document_info={
     'shot': {'token_length': 300,
              'n_documents': 4},
     'run': {'token_length': 400,
-            'n_documents': 3},
+            'n_documents': 5},
     'miniproposal': {'token_length': 400,
                      'n_documents': 0}
 }
