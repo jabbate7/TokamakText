@@ -7,7 +7,6 @@ import yaml
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-
 class LLMInterface:
     model_name: str
     def __init__(self) -> None:
@@ -21,12 +20,12 @@ def get_llm_interface(llm_type):
     if llm_type == "openai":
         import openai
         class OpenAIInterface(LLMInterface):
-            def __init__(self, model_name="gpt-3.5-turbo") -> None:
+            def __init__(self) -> None:
                 super().__init__()
+                self.model_name = os.getenv("LLM_NAME",default="gpt-3.5-turbo")
                 openai.api_key = os.getenv("OPENAI_API_KEY")
                 if openai.api_key is None:
                     logging.warning("openai.api_key is None")
-                self.model_name = model_name
 
             def query(self, system, user_message):
                 completion = openai.ChatCompletion.create(
@@ -43,14 +42,12 @@ def get_llm_interface(llm_type):
         from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
         class HuggingFaceInterface(LLMInterface):
             def __init__(self) -> None:
-
-                yaml_file_path = os.path.join(FILE_PATH, "configs", "huggingface.yaml")
-                self.config = yaml.load(open(yaml_file_path, "r"), Loader=yaml.FullLoader)
-                model_name, cache_dir = self.config["model_name"], self.config["cache_dir"]
+                model_name = os.getenv("LLM_NAME")
+                cache_dir = os.getenv("CACHE_DIR")
 
                 # Check if cache_Dir is a real directory
                 if not os.path.isdir(cache_dir):
-                    raise Exception(f"cache_dir {cache_dir} specified in {yaml_file_path} is not a directory")
+                    raise Exception(f"cache_dir {cache_dir} specified in is not a directory")
                 
                 self.model_name = model_name
                 self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)

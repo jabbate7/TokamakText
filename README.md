@@ -4,8 +4,21 @@
 1. Make pip environemnt
 2. `python3 -m pip install chromadb python-dotenv openai flask h5py`
 
+
+### Setting up dotenv
+You should make a file in the root of this repo called `.env` that contains the following variables:
+```
+LLM_NAME= ${your_llm_model_name} # (e.g "gpt-3.5-turbo-16k" or "NousResearch/Nous-Hermes-Llama2-13b")
+
+OPENAI_API_KEY=${your_openai_api_key} # Only if you are using OpenAI models
+
+CACHE_DIR=${your_cache_dir} # Only if you are using Huggingface models
+```
+
 ### Running HuggingFace Models
 To run huggingface models, you'll need to install the torch and transformers libraries. A conda `environment.yml` file is provided for this purpose.
+
+
 
 ### Set up OPEN AI Keys
 Go to OPEN AI website and set-up billing information and get API key. You can set usage limits to make sure you don't get charged more than $1 or so. 

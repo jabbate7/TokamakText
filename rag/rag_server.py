@@ -2,6 +2,7 @@ from flask import Flask, render_template_string, request
 from rag import retrieve, rag_answer_question
 from llm_interface import get_llm_interface
 import click
+from dotenv import load_dotenv
 
 @click.command()
 @click.option('--llm_type', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
@@ -64,4 +65,5 @@ def main(llm_type):
     
     app.run(debug=True)
 if __name__ == "__main__":
+    load_dotenv()
     main()
