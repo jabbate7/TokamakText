@@ -14,7 +14,7 @@ with open('prompts/user_prompt.txt', 'r') as f:
 with open('prompts/query_system_prompt.txt', 'r') as f:
     QUERY_SYSTEM_PROMPT = f.read()
 
-client = chromadb.PersistentClient(path="/nobackup1/allenw/chatcmod_db/")
+client = chromadb.PersistentClient(path="/pool001/allenw/chatcmod_db/")
 print(f"{client.list_collections()=}")
 collection_name = "cmod_text-embedding-ada-002"
 
