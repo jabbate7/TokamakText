@@ -4,6 +4,8 @@
 1. Make pip environemnt
 2. `python3 -m pip install chromadb python-dotenv openai flask h5py`
 
+### Running HuggingFace Models
+To run huggingface models, you'll need to install the torch and transformers libraries. A conda `environment.yml` file is provided for this purpose.
 
 ### Set up OPEN AI Keys
 Go to OPEN AI website and set-up billing information and get API key. You can set usage limits to make sure you don't get charged more than $1 or so. 

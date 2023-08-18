@@ -4,7 +4,4 @@ venvtt/
 *__pycache__*
 rag/db
 .vscode/
-<<<<<<< HEAD
 env/
-=======
->>>>>>> WIP, trying to get openai and huggingface interfaces working

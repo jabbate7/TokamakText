@@ -1,24 +1,15 @@
 from flask import Flask, render_template_string, request
 from rag import retrieve, rag_answer_question
-from llm_interface import OpenAIInterface, HuggingFaceInterface
+from llm_interface import get_llm_interface
 import click
 
-def get_llm_interface(model_name):
-    if model_name == "openai":
-        return OpenAIInterface()
-    elif model_name == "huggingface":
-        return HuggingFaceInterface()
-    else:
-        raise ValueError(f"Invalid model name: {model_name}")
-
-
 @click.command()
-@click.option('--model_name', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
-def main(model_name):
+@click.option('--llm_type', type=click.Choice(['openai', 'huggingface']), default="openai", help='The model to run.')
+def main(llm_type):
     """
     Load the language model to use.
     """
-    llm_interface = get_llm_interface(model_name)
+    llm_interface = get_llm_interface(llm_type)
     
     """
     Run the app.
@@ -49,13 +40,11 @@ def main(model_name):
         return render_template_string(
         """
         <form method="post">
-            <label for="question">Ask {{ model_name }} a Question:</label>
+            <label for="question">Ask {{ llm_type }} a Question:</label>
             <textarea id="question" name="question" cols="40" rows="5" required></textarea>
             <input type="submit" value="Submit">
         </form>
         {% if display_results %}
-            <h3>Retrieved Results:</h3>
-            <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
             <h3>Model Name:</h3>
             <pre style="white-space: pre-wrap;">{{ model_name }}</pre>
             <h3>Question:</h3>
@@ -64,6 +53,8 @@ def main(model_name):
             <pre style="white-space: pre-wrap;">{{ thinking }}</pre>
             <h3>Generated Answer:</h3>
             <pre style="white-space: pre-wrap;">{{ answer }}</pre>
+            <h3>Retrieved Results:</h3>
+            <pre style="white-space: pre-wrap;">{{ retrieved_results }}</pre>
         {% endif %}
         """, question=question, 
             retrieved_results=retrieved_results, 
