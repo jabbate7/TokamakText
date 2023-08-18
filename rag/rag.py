@@ -3,6 +3,7 @@ import chromadb
 import openai
 from dotenv import load_dotenv
 load_dotenv()
+from text_helpers import document_info
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -15,7 +16,6 @@ with open('prompts/query_system_prompt.txt', 'r') as f:
 
 client = chromadb.PersistentClient(path="db/")
 print(f"{client.list_collections()=}")
-collection_name = "test_embeddings"
 
 def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo"):
     completion = openai.ChatCompletion.create(
@@ -32,12 +32,16 @@ def retrieve(question):
     print(f'initial question: {question}')
     # query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
     # print(f'query text: {query_text}')
-    collection = client.get_collection(collection_name)
-    qr = collection.query(query_texts=question, n_results=5)
-    ids = qr['ids'][0]
-    documents = qr['documents'][0]
-    # change this into a dict or something
-    res = {k: v for k, v in zip(ids, documents)}
+    res={}
+    for document_type in ['shot', 'run']:
+        n_results=document_info[document_type]['n_documents']
+        if n_results>0:
+            collection = client.get_collection(f'{document_type}_embeddings')
+            qr = collection.query(query_texts=question, n_results=n_results)
+            ids = qr['ids'][0]
+            documents = qr['documents'][0]
+            # change this into a dict or something
+            res.update({k: v for k, v in zip(ids, documents)})
     return res
 
 def process_results(results):
@@ -56,6 +60,7 @@ def test():
     question = "What should I do if we are getting tearing modes early in the shot?"
     results = retrieve(question)
     answer = rag_answer_question(question, results)
+    print(results)
     print(answer)
 
 

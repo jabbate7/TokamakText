@@ -20,7 +20,7 @@ def chunk_text(text, chunking=1700):
         
     return chunks
 
-def main(text_dir):
+def main(text_dir, embedding_title='text'):
     files = os.listdir(text_dir)
     text_data = {}
     for fn in files:
@@ -30,7 +30,7 @@ def main(text_dir):
             text_data[fn+f'_{i}'] = chunk
 
     client = chromadb.PersistentClient(path='db')
-    collection = client.get_or_create_collection('test_embeddings')
+    collection = client.get_or_create_collection(f'{embedding_title}_embeddings')
     keys = list(text_data.keys())
     values = list(text_data.values())
     collection.add(ids = keys, documents = values)
@@ -38,4 +38,4 @@ def main(text_dir):
     
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
