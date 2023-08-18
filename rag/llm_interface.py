@@ -1,11 +1,7 @@
 import os
-import openai
 import logging
-import yaml
-
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
-
 
 class LLMInterface:
     model_name: str

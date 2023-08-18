@@ -1,6 +1,6 @@
 import os
 import chromadb
-from llm_interface import LLMInterface
+from llm_interface import get_llm_interface
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
