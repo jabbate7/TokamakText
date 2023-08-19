@@ -1,11 +1,12 @@
 import os
 import chromadb
 import openai
-from dotenv import load_dotenv
-load_dotenv()
 from text_helpers import document_info
+from llm_interface import LLMInterface, get_llm_interface
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    load_dotenv()
 
 with open('prompts/system_prompt.txt', 'r') as f:
     SYSTEM_PROMPT = f.read()
@@ -15,18 +16,7 @@ with open('prompts/query_system_prompt.txt', 'r') as f:
     QUERY_SYSTEM_PROMPT = f.read()
 
 client = chromadb.PersistentClient(path="db/")
-print(f"{client.list_collections()=}")
-
-def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo"):
-    completion = openai.ChatCompletion.create(
-      model=model,
-      messages=[
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message}
-      ]
-    )
-
-    return completion.choices[0].message.content
+print(f"{client.list_collections()}")
 
 def retrieve(question):
     print(f'initial question: {question}')
@@ -50,20 +40,17 @@ def process_results(results):
         processed_results = processed_results + f"{k}: {v}\n"
     return processed_results
 
-def rag_answer_question(question, results):
+def rag_answer_question(question, results, model: LLMInterface):
     processed_results = process_results(results)
     formatted_user_prompt = USER_PROMPT.format(question=question, results=processed_results)
-    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-3.5-turbo')
-
+    return model.query(SYSTEM_PROMPT, formatted_user_prompt)
 
 def test():
-    question = "What should I do if we are getting tearing modes early in the shot?"
+    question = "Tell me about shots that struggled with tearing modes"
+    model = get_llm_interface("openai")
     results = retrieve(question)
-    answer = rag_answer_question(question, results)
-    print(results)
-    print(answer)
-
-
+    answer = rag_answer_question(question, results, model)
+    print(f"Model {model.model_name} answer:\n{answer}")
 
 if __name__ == '__main__':
     test()

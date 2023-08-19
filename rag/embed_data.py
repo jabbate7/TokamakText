@@ -6,6 +6,7 @@ from tqdm import tqdm
 # from embedding.llm_utils import embed_sentences
 import chromadb
 from text_helpers import make_document_dic_from_string
+from tqdm import tqdm
 
 def read_file(file_name):
     data = h5py.File(file_name, 'r')

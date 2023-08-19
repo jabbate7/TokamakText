@@ -1,4 +1,4 @@
-import openai
+# import openai
 import os
 from dotenv import load_dotenv
 import numpy as np
@@ -6,6 +6,7 @@ from typing import List, Optional
 import asyncio
 from asyncio import Semaphore
 import logging
+import openai
 from time import time, sleep
 
 
