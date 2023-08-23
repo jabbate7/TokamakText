@@ -44,7 +44,7 @@ def get_llm_interface(llm_type):
                 # Check if cache_Dir is a real directory
                 if not os.path.isdir(cache_dir):
                     raise Exception(f"cache_dir {cache_dir} specified in is not a directory")
-                
+
                 self.model_name = model_name
                 self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
                 self.model = AutoModelForCausalLM.from_pretrained(

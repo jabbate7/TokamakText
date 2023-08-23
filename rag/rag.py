@@ -1,13 +1,12 @@
 import os
 import chromadb
-from llm_interface import get_llm_interface
+import openai
+from text_helpers import document_info
+from llm_interface import LLMInterface, get_llm_interface
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
     load_dotenv()
-
-
-
 
 with open('prompts/system_prompt.txt', 'r') as f:
     SYSTEM_PROMPT = f.read()
@@ -18,16 +17,21 @@ with open('prompts/query_system_prompt.txt', 'r') as f:
 
 client = chromadb.PersistentClient(path="db/")
 print(f"{client.list_collections()}")
-collection_name = "test_embeddings"
 
 def retrieve(question):
     print(f'initial question: {question}')
-    collection = client.get_collection(collection_name)
-    qr = collection.query(query_texts=question, n_results=5)
-    ids = qr['ids'][0]
-    documents = qr['documents'][0]
-    # change this into a dict or something
-    res = {k: v for k, v in zip(ids, documents)}
+    # query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
+    # print(f'query text: {query_text}')
+    res={}
+    for document_type in ['shot', 'run']:
+        n_results=document_info[document_type]['n_documents']
+        if n_results>0:
+            collection = client.get_collection(f'{document_type}_embeddings')
+            qr = collection.query(query_texts=question, n_results=n_results)
+            ids = qr['ids'][0]
+            documents = qr['documents'][0]
+            # change this into a dict or something
+            res.update({k: v for k, v in zip(ids, documents)})
     return res
 
 def process_results(results):
@@ -47,12 +51,6 @@ def test():
     results = retrieve(question)
     answer = rag_answer_question(question, results, model)
     print(f"Model {model.model_name} answer:\n{answer}")
-
-    model2 = get_llm_interface("huggingface")
-    results2 = retrieve(question, model2)
-    answer2 = rag_answer_question(question, results2, model2)
-    print(f"Model {model2.model_name} answer:\n{answer2}")
-
 
 if __name__ == '__main__':
     test()
