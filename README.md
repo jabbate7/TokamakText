@@ -25,6 +25,9 @@ Go to OPEN AI website and set-up billing information and get API key. You can se
 
 Copy OPENAI key to a file you make called `.env` in the `rag/` directory with the line: `OPENAI_API_KEY="YOUR_KEY"`
 
+### Convert PDFs to txt file
+This is needed to embed miniproposals and any papers from journals. In the main directory run `python mass_pdf_to_txt.py pdf_dir txt_dir` and it will grab all the pdfs from `pdf_dir` and output them in `txt_dir` with the same name. This is not error checked well so there should not be non-pdfs in `pdf_dir` and `txt_dir` has to exist. 
+
 
 ### Set-up embeddings
 Move to `rag/` directory and do everything else there. Run `python3 embed_data.py h5_file` to turn a h5 file into a file full of embeddings. Make sure the embeddings end up in a `db/` directory in the `rag/` directory, not the main directory. 
