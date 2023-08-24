@@ -10,11 +10,11 @@ model = os.getenv("LLM_NAME")
 # rule of thumb from internet: token is about 0.75 of a word, or 4 characters
 document_info={
     'shot': {'token_length': 300,
-             'n_documents': 4},
+             'n_documents': 14},
     'run': {'token_length': 400,
-            'n_documents': 5},
+            'n_documents': 10},
     'miniproposal': {'token_length': 400,
-                     'n_documents': 0}
+                     'n_documents': 10}
 }
 # overlap so we don't miss context due to splitting string at awkward spot
 overlap_num_tokens=60

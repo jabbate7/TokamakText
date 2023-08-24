@@ -23,7 +23,7 @@ def retrieve(question):
     # query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
     # print(f'query text: {query_text}')
     res={}
-    for document_type in ['shot', 'run']:
+    for document_type in ['shot', 'run', 'miniproposal']:
         n_results=document_info[document_type]['n_documents']
         if n_results>0:
             collection = client.get_collection(f'{document_type}_embeddings')
@@ -43,6 +43,7 @@ def process_results(results):
 def rag_answer_question(question, results, model: LLMInterface):
     processed_results = process_results(results)
     formatted_user_prompt = USER_PROMPT.format(question=question, results=processed_results)
+    print(formatted_user_prompt)
     return model.query(SYSTEM_PROMPT, formatted_user_prompt)
 
 def test():
