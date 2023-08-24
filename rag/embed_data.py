@@ -21,7 +21,7 @@ def process_text_data(text_data):
             text = text_data[shot]['text'][entry_ind].decode('utf-8')
             topic = text_data[shot]['topic'][entry_ind].decode('utf-8')
             username = text_data[shot]['username'][entry_ind].decode('utf-8')
-            if username not in ('pcsops'):
+            if True: #if username not in ('pcsops'):
                 strs.append(f"user {username} ({topic}): {text}")
         new_data.update(make_document_dic_from_string("\n".join(strs),
                                                       shot,
@@ -36,17 +36,20 @@ def main(targt):
         if shot in ('spatial_coordinates', 'times'):
             continue
         vals = data[shot]
-        run = vals['run_sql'][()]
-        text = vals['text_sql'][:]
-        # summary = vals['summary_sql']
-        topic = vals['topic_sql'][:]
-        username = vals['username_sql'][:]
-        text_data[shot] = {
-                'run': run,
-                'text': text,
-                'topic': topic,
-                'username': username,
-                }
+        try:
+            run = vals['run_sql'][()]
+            text = vals['text_sql'][:]
+            # summary = vals['summary_sql']
+            topic = vals['topic_sql'][:]
+            username = vals['username_sql'][:]
+            text_data[shot] = {
+                    'run': run,
+                    'text': text,
+                    'topic': topic,
+                    'username': username,
+                    }
+        except Exception as e:
+            print(f'{shot} failed')
 
     data.close()
     processed_text_data = process_text_data(text_data)
