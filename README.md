@@ -6,14 +6,22 @@
 
 
 ### Setting up dotenv
-You should make a file in the root of this repo called `.env` that contains the following variables:
+You should make a file in the main directory of this repo called `.env` that contains the following variables:
 ```
-LLM_NAME= ${your_llm_model_name} # (e.g "gpt-3.5-turbo-16k" or "NousResearch/Nous-Hermes-Llama2-13b")
+LLM_NAME="your_llm_model_name" # (e.g "gpt-3.5-turbo-16k" or "NousResearch/Nous-Hermes-Llama2-13b")
 
-OPENAI_API_KEY=${your_openai_api_key} # Only if you are using OpenAI models
+OPENAI_API_KEY="your_openai_api_key" # Only if you are using OpenAI models
 
-CACHE_DIR=${your_cache_dir} # Only if you are using Huggingface models
+CACHE_DIR="your_cache_dir" # Only if you are using Huggingface models
 ```
+
+Your OPENAI key will look something like `sk-RANDOMTEXT`. So if you you use gpt3.5 your `.env` file will live in the `TokamakText` directory and look like:
+```
+LLM_NAME="gpt-3.5-turbo-16k"
+
+OPENAI_API_KEY="sk-RANDOMTEXT"
+```
+
 
 ### Running HuggingFace Models
 To run huggingface models, you'll need to install the torch and transformers libraries. A conda `environment.yml` file is provided for this purpose.
