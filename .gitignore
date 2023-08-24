@@ -5,3 +5,5 @@ venvtt/
 rag/db
 .vscode/
 env/
+multimodal/multimodal_data
+*.DS_STORE
