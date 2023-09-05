@@ -64,18 +64,19 @@ def main(targt):
                 model_name="text-embedding-ada-002"
             )
 
-    client = chromadb.PersistentClient(path="/nobackup1/allenw/chatcmod_db")
+    client = chromadb.PersistentClient(path="/home/awang/chatcmod_db")
     collection = client.get_or_create_collection("cmod_text-embedding-ada-002", embedding_function=openai_ef)
 
-    batches = batch_dictionary(processed_text_data, 1000)
+    batches = batch_dictionary(processed_text_data, 500)
     for batch in tqdm(batches):
         keys = list(batch.keys())
         values = list(batch.values())
+        import pdb; pdb.set_trace()
         collection.add(ids = keys, documents = values)
         print(f'added batch of {len(keys)} documents to collection')
-        time.sleep(90) # Wait for a minute and a half to not exceed the rate limits.
+        time.sleep(60) # Wait a minute to not exceed rate limits.
     # print(f'embeddings: {embeddings}')
 
 if __name__ == '__main__':
-    pickle_file = "/nobackup1/allenw/Scratch/logbook.pkl"
+    pickle_file = "/home/awang/logbook.pkl"
     main(pickle_file)
