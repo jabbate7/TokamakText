@@ -16,7 +16,7 @@ with open('prompts/user_prompt.txt', 'r') as f:
 with open('prompts/query_system_prompt.txt', 'r') as f:
     QUERY_SYSTEM_PROMPT = f.read()
 
-client = chromadb.PersistentClient(path="/pool001/allenw/chatcmod_db/")
+client = chromadb.PersistentClient(path="/home/awang/chatcmod_db/")
 print(f"{client.list_collections()=}")
 collection_name = "cmod_text-embedding-ada-002"
 
@@ -25,7 +25,7 @@ openai_ef = embedding_functions.OpenAIEmbeddingFunction(
             model_name="text-embedding-ada-002"
         )
 
-def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo"):
+def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo-16k"):
     completion = openai.ChatCompletion.create(
       model=model,
       messages=[
@@ -41,7 +41,7 @@ def retrieve(question):
     query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
     print(f'query text: {query_text}')
     collection = client.get_collection(collection_name, embedding_function=openai_ef)
-    qr = collection.query(query_texts=query_text, n_results=5)
+    qr = collection.query(query_texts=query_text, n_results=10)
     ids = qr['ids'][0]
     documents = qr['documents'][0]
     # change this into a dict or something
@@ -52,6 +52,7 @@ def process_results(results):
     processed_results = f""
     for k, v in results.items():
         processed_results = processed_results + f"{k}: {v}\n"
+    print(len(processed_results))
     return processed_results
 
 def rag_answer_question(question, results, model: LLMInterface):

@@ -71,7 +71,4 @@ def main(llm_type):
     """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
 
 if __name__ == "__main__":
-    app.run(debug=True)
-if __name__ == "__main__":
-    load_dotenv()
-    main()
+    app.run(debug=True, host="chat-cmod.psfc.mit.edu", port=5000)
