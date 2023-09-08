@@ -36,10 +36,8 @@ def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo-16k")
 
 def retrieve(question):
     print(f'initial question: {question}')
-    query_text = get_chat_completion(QUERY_SYSTEM_PROMPT, question)
-    print(f'query text: {query_text}')
     collection = client.get_collection(collection_name, embedding_function=openai_ef)
-    qr = collection.query(query_texts=query_text, n_results=10)
+    qr = collection.query(query_texts=question, n_results=10)
     ids = qr['ids'][0]
     documents = qr['documents'][0]
     # change this into a dict or something

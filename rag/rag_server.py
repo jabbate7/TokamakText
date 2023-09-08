@@ -1,5 +1,6 @@
 from flask import Flask, render_template_string, request
 from rag import retrieve, rag_answer_question
+import h5py
 
 app = Flask(__name__)
 
@@ -12,6 +13,16 @@ def rag(question, results):
     # Your RAG code here
     return "Generated Answer"
 '''
+
+def log_result(dict_to_log, filename="log.h5"):
+    # Create or open an HDF5 file in 'a' mode
+    with h5py.File(filename, 'a') as f:
+        # Create a new group for each dictionary
+        new_group_name = 'example_number' + str(len(f.keys()))
+        new_group = f.create_group(new_group_name)
+        for key, value in dict_to_log.items():
+            new_group.create_dataset(key, data=value)
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -34,6 +45,16 @@ def index():
     else:
         answer = split_response[1].strip()
 
+    if len(answer) > 0:
+        log_dic = {
+            "question": question,
+            "retrieved_results": retrieved_results,
+            "thinking": thinking,
+            "answer": answer,
+        }
+        
+        log_result(log_dic)
+
     return render_template_string("""
     <form method="post">
         <label for="question">Ask a Question:</label>
@@ -53,4 +74,5 @@ def index():
     """, question=question, retrieved_results=retrieved_results, thinking=thinking, answer=answer, display_results=display_results)
 
 if __name__ == "__main__":
-    app.run(debug=True, host="chat-cmod.psfc.mit.edu", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
+    # app.run(debug=True, port=5000)
