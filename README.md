@@ -24,7 +24,18 @@ OPENAI_API_KEY="sk-RANDOMTEXT"
 
 
 ### Running HuggingFace Models
-To run huggingface models, you'll need to install the torch and transformers libraries. A conda `environment.yml` file is provided for this purpose.
+To run huggingface models, you'll need to install the torch and transformers libraries. A conda `environment.yml` file is provided, if useful.
+
+You just have to set in your `rag/.env` the name of the model you want to use plus the path to the directory where the model will be stored. For example, to run Llama-2-13b-chat-hf and store it in your home dir you would just have to run:
+```
+LLM_NAME=meta-llama/Llama-2-13b-chat-hf
+CACHE_DIR=~/
+```
+
+Then, when launching rag_server.py provide the `--llm_type huggingface` argument:
+```
+python3 rag_server.py --llm_type huggingface
+```
 
 
 
