@@ -12,21 +12,21 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # openai.api_base = "https://test-oai69420.openai.azure.com/"
 # openai.api_version = "2023-05-15"
 
-def process_text_data(data, topics_exclude=['rf_monitor'], max_string_length=4*2048):
+def process_text_data(data, topics_exclude=['rf_monitor'], max_string_length=4*512):
     # Exclude rf_monitor as it tends to have a lot of raw data for whatever reason.
     new_data = dict()
     shots = list(data.keys())
     subset_data = {k: data[k] for k in shots}
     for shot, shot_data in tqdm(subset_data.items()):
-        shot_text = f"CMOD Shot Number: {shot}\n"
-        for entry in shot_data:
+        shot_header = f"CMOD Shot Number: {shot}\n"
+        for i, entry in enumerate(shot_data):
             if entry['topic'] in topics_exclude:
                 continue
-            entry_string = f"ENTRY TOPIC: {entry['topic']}\nENTRY USER: {entry['user']}\nENTRY TEXT:\n{entry['text']}\n"
-            shot_text += "\n" + entry_string
+            entry_key = f"{shot}_{i}"
+            entry_string = f"{shot_header}ENTRY TOPIC: {entry['topic']}\nENTRY USER: {entry['user']}\nENTRY TEXT:\n{entry['text']}\n"
         
-        if len(shot_text) <= max_string_length:
-            new_data[shot] = shot_text
+            if len(entry_string) <= max_string_length:
+                new_data[entry_key] = entry_string
     return new_data
 
 def read_file(pickle_file):
@@ -45,16 +45,6 @@ def batch_dictionary(dictionary, batch_size):
 
     return batches
 
-def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo"):
-    completion = openai.ChatCompletion.create(
-      model=model,
-      messages=[
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message}
-      ]
-    )
-
-    return completion.choices[0].message.content
 
 def main(targt):            
     data = read_file(targt)
@@ -64,14 +54,13 @@ def main(targt):
                 model_name="text-embedding-ada-002"
             )
 
-    client = chromadb.PersistentClient(path="/home/awang/chatcmod_db")
+    client = chromadb.PersistentClient(path="/home/awang/chatcmod_entrywise_db")
     collection = client.get_or_create_collection("cmod_text-embedding-ada-002", embedding_function=openai_ef)
 
-    batches = batch_dictionary(processed_text_data, 500)
+    batches = batch_dictionary(processed_text_data, 1500)
     for batch in tqdm(batches):
         keys = list(batch.keys())
         values = list(batch.values())
-        import pdb; pdb.set_trace()
         collection.add(ids = keys, documents = values)
         print(f'added batch of {len(keys)} documents to collection')
         time.sleep(60) # Wait a minute to not exceed rate limits.
