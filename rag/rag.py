@@ -25,7 +25,7 @@ openai_ef = embedding_functions.OpenAIEmbeddingFunction(
             model_name="text-embedding-ada-002"
         )
 
-def get_chat_completion(system_message, user_message, model="gpt-3.5-turbo-16k"):
+def get_chat_completion(system_message, user_message, model="gpt-4"):
     completion = openai.ChatCompletion.create(
       model=model,
       messages=[
@@ -56,7 +56,7 @@ def process_results(results):
 def rag_answer_question(question, results, model: LLMInterface):
     processed_results = process_results(results)
     formatted_user_prompt = USER_PROMPT.format(question=question, results=processed_results)
-    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-3.5-turbo-16k')
+    return get_chat_completion(SYSTEM_PROMPT, formatted_user_prompt, model='gpt-4')
 
 
 def test():
