@@ -18,7 +18,7 @@ def get_llm_interface(llm_type):
         class OpenAIInterface(LLMInterface):
             def __init__(self) -> None:
                 super().__init__()
-                self.model_name = os.getenv("LLM_NAME",default="gpt-3.5-turbo")
+                self.model_name = os.getenv("LLM_NAME",default="gpt-4")
                 openai.api_key = os.getenv("OPENAI_API_KEY")
                 if openai.api_key is None:
                     logging.warning("openai.api_key is None")
